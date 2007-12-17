@@ -11,7 +11,6 @@ Source1: %{name}.initscript
 License: GPL
 Group: System/Kernel and hardware
 Url: http://mnm.uib.es/~gallir/cpudyn/
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 ExclusiveArch: %ix86 ppc x86_64
 Requires(pre): rpm-helper
 Requires(post): rpm-helper
