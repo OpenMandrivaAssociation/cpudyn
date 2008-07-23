@@ -1,6 +1,6 @@
 %define name cpudyn
 %define version 1.0.1
-%define release %mkrel 4
+%define release %mkrel 6
 
 Summary: A tools to control CPU frequency
 Name: %{name}
