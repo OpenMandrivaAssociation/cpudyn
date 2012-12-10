@@ -1,6 +1,7 @@
+%define debug_package   %nil
 %define name cpudyn
 %define version 1.0.1
-%define release %mkrel 7
+%define release %mkrel 6
 
 Summary: A tools to control CPU frequency
 Name: %{name}
@@ -11,10 +12,10 @@ Source1: %{name}.initscript
 License: GPL
 Group: System/Kernel and hardware
 Url: http://mnm.uib.es/~gallir/cpudyn/
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 ExclusiveArch: %ix86 ppc x86_64
 Requires(pre): rpm-helper
 Requires(post): rpm-helper
+Patch0:		cpudyn-printf-format.patch
 
 %description
 This program control the speed in Intel SpeedStep, Pentium 4 Mobile
@@ -30,12 +31,12 @@ every processor supported by the kernel's cpufreq driver.
 
 %prep
 %setup -q -n %name
+%patch0 -p0
 
 %build
 %make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
-rm -rf $RPM_BUILD_ROOT
 mkdir -p %buildroot{%_sbindir,%_mandir/man8,%_sysconfdir/sysconfig,%_initrddir}
 cp cpudynd %buildroot%_sbindir/cpudynd
 #bzip2 cpudynd.8
@@ -48,11 +49,7 @@ cat > %buildroot/%_sysconfdir/sysconfig/%name <<EOF
 OPTS="-i 1 -p 0.5 0.90"
 EOF
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %files
-%defattr(-,root,root)
 %_sbindir/cpudynd
 %_mandir/man8/cpudynd*
 %config(noreplace) %_sysconfdir/sysconfig/%{name}
@@ -63,6 +60,3 @@ rm -rf $RPM_BUILD_ROOT
 
 %preun
 %_preun_service %{name}
-
-
-
