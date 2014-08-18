@@ -1,0 +1,10 @@
+[Unit]
+Description=Cpudyn control the speed of CPU like Pentium III/IV or PowerPC
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/cpudynd -d -i 1 -p 0.5 0.90
+
+[Install]
+WantedBy=multi-user.target  

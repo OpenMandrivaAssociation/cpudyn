@@ -1,21 +1,20 @@
 %define debug_package   %nil
-%define name cpudyn
-%define version 1.0.1
-%define release %mkrel 6
 
 Summary: A tools to control CPU frequency
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Source0: http://mnm.uib.es/gallir/cpudyn/download/%{name}-%{version}.tar.bz2
-Source1: %{name}.initscript
+Name:    cpudyn
+Version: 1.0.1
+Release: 9
+Source0: %{name}-%{version}.tar.bz2
+Source1: %{name}.service
 License: GPL
-Group: System/Kernel and hardware
-Url: http://mnm.uib.es/~gallir/cpudyn/
-ExclusiveArch: %ix86 ppc x86_64
-Requires(pre): rpm-helper
-Requires(post): rpm-helper
-Patch0:		cpudyn-printf-format.patch
+Group:   System/Kernel and hardware
+Url:     http://mnm.uib.es/~gallir/cpudyn/
+Requires(pre):    rpm-helper
+Requires(post):   rpm-helper
+Requires(post):   systemd-units
+Requires(preun):  systemd-units
+Requires(postun): systemd-units
+Patch0: cpudyn-printf-format.patch
 
 %description
 This program control the speed in Intel SpeedStep, Pentium 4 Mobile
@@ -30,33 +29,47 @@ IBM Thinkpad. cpudyn is just a user space program, so it will work on
 every processor supported by the kernel's cpufreq driver.
 
 %prep
-%setup -q -n %name
+%setup -q -n %{name}
 %patch0 -p0
 
 %build
-%make CFLAGS="$RPM_OPT_FLAGS"
+%make CFLAGS="%{optflags}"
 
 %install
-mkdir -p %buildroot{%_sbindir,%_mandir/man8,%_sysconfdir/sysconfig,%_initrddir}
-cp cpudynd %buildroot%_sbindir/cpudynd
+mkdir -p %{buildroot}{%{_sbindir},%{_mandir}/man8,%{_sysconfdir}/sysconfig}
+cp cpudynd %{buildroot}%{_sbindir}/cpudynd
 #bzip2 cpudynd.8
-cp cpudynd.8 %buildroot%_mandir/man8/
+cp cpudynd.8 %{buildroot}%{_mandir}/man8/
 
-install -m 755 %SOURCE1 %buildroot%_initrddir/%name
+install -D -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
 
-cat > %buildroot/%_sysconfdir/sysconfig/%name <<EOF
+cat > %{buildroot}/%{_sysconfdir}/sysconfig/%{name} <<EOF
 # see man 8 cpudynd  for details
 OPTS="-i 1 -p 0.5 0.90"
 EOF
 
 %files
-%_sbindir/cpudynd
-%_mandir/man8/cpudynd*
-%config(noreplace) %_sysconfdir/sysconfig/%{name}
-%config(noreplace) %_initrddir/%{name}
+%{_sbindir}/cpudynd
+%{_mandir}/man8/cpudynd*
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
+%{_unitdir}/%{name}.service
 
 %post
-%_post_service %{name}
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
 
 %preun
-%_preun_service %{name}
+if [ $1 -eq 0 ] ; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
+    /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
+fi
+
+%postun
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+fi
