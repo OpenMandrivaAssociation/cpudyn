@@ -3,7 +3,7 @@
 Summary: A tools to control CPU frequency
 Name:    cpudyn
 Version: 1.0.1
-Release: 9
+Release: 10
 Source0: %{name}-%{version}.tar.bz2
 Source1: %{name}.service
 License: GPL
