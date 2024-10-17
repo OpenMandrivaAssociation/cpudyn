@@ -8,7 +8,7 @@ Source0: %{name}-%{version}.tar.bz2
 Source1: %{name}.service
 License: GPL
 Group:   System/Kernel and hardware
-Url:     http://mnm.uib.es/~gallir/cpudyn/
+Url:     https://mnm.uib.es/~gallir/cpudyn/
 Requires(pre):    rpm-helper
 Requires(post):   rpm-helper
 Requires(post):   systemd-units
