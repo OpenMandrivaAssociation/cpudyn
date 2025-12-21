@@ -16,6 +16,7 @@ Requires(preun):  systemd-units
 Requires(postun): systemd-units
 Patch0: cpudyn-printf-format.patch
 
+BuildRequires:	make
 %description
 This program control the speed in Intel SpeedStep, Pentium 4 Mobile
 and PowerPC machines with the cpufreq compiled in the kernel.
